@@ -55,30 +55,30 @@ public class Trick {
     System.out.println(redPile);
   }
 
-}
+  private static class BlackFirstComparator implements Comparator<Card> {
 
-class BlackFirstComparator implements Comparator<Card> {
-
-  @Override
-  public int compare(Card card1, Card card2) {
-    int result = card1.getColor().compareTo(card2.getColor());
-    if (result == 0) {
-      result = card1.compareTo(card2);
+    @Override
+    public int compare(Card card1, Card card2) {
+      int result = card1.getColor().compareTo(card2.getColor());
+      if (result == 0) {
+        result = card1.compareTo(card2);
+      }
+      return result;
     }
-    return result;
+
   }
 
-}
+  private static class RedFirstComparator implements Comparator<Card> {
 
-class RedFirstComparator implements Comparator<Card> {
-
-  @Override
-  public int compare(Card card1, Card card2) {
-    int result = card2.getColor().compareTo(card1.getColor());
-    if (result == 0) {
-      result = card1.compareTo(card2);
+    @Override
+    public int compare(Card card1, Card card2) {
+      int result = card2.getColor().compareTo(card1.getColor());
+      if (result == 0) {
+        result = card1.compareTo(card2);
+      }
+      return result;
     }
-    return result;
+
   }
 
 }
