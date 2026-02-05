@@ -7,7 +7,9 @@ import edu.cnm.deepdive.cards.service.Trick;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.random.RandomGenerator;
+import java.util.stream.Collectors;
 
 public class View {
 
@@ -18,6 +20,14 @@ public class View {
       Comparator.comparing(Card::getColor)
           .reversed()
           .thenComparing(Comparator.naturalOrder());
+  private static final String BUNDLE_BASE_NAME = "card";
+  private static final String COMPOSITION_FORMAT_KEY = "composition-format";
+
+  private static final ResourceBundle bundle;
+
+  static {
+    bundle = ResourceBundle.getBundle(BUNDLE_BASE_NAME);
+  }
 
   void perform() {
     System.out.println("Are you Ready For a Card Trick?");
@@ -30,13 +40,26 @@ public class View {
     System.out.println("Now we'll swap some cards");
     int numSwaps = trick.swap();
     System.out.println("Swapped " + numSwaps + " cards between our piles");
-    Map<Color, List<Card>> result = trick.getResult();
-    TrickResult representation = new TrickResult(result.get(Color.BLACK), result.get(Color.RED));
+    TrickResult representation = new TrickResult(trick.getResult());
     System.out.println("Here is the result:");
     System.out.println(representation);
   }
 
-  private record TrickResult(List<Card> blackPile, List<Card> redPile) {
+  public record TrickResult(List<Card> blackPile, List<Card> redPile) {
+
+    private TrickResult(Map<Color, List<Card>> piles) {
+      List<Card> sortedBlackPile = piles
+          .get(Color.BLACK)
+          .stream()
+          .sorted(BLACK_FIRST_COMPARATOR)
+          .toList();
+      List<Card> sortedRedPile = piles
+          .get(Color.RED)
+          .stream()
+          .sorted(RED_FIRST_COMPARATOR)
+          .toList();
+      this(sortedBlackPile, sortedRedPile);
+    }
 
     @Override
     public String toString() {
@@ -48,8 +71,27 @@ public class View {
           .stream()
           .filter((card) -> card.getColor() == Color.BLACK)
           .count();
-      return "Red Pile (" + redInRedCount + " red cards): " + redPile +
-          "\nBlack Pile (" + blackInblackCount + " black cards): " + blackPile;
+      String compositionFormat = bundle.getString(COMPOSITION_FORMAT_KEY);
+      String blackPileRepr = blackPile
+          .stream()
+          .map((card) -> {
+            return compositionFormat.formatted(
+                bundle.getString(card.getRank().name()),
+                bundle.getString(card.getSuit().name())
+            );
+          })
+          .collect(Collectors.joining(", "));
+      String redPileRepr = redPile
+          .stream()
+          .map((card) -> {
+            return compositionFormat.formatted(
+                bundle.getString(card.getRank().name()),
+                bundle.getString(card.getSuit().name())
+            );
+          })
+          .collect(Collectors.joining(", "));
+      return "Red Pile (" + redInRedCount + " red cards): " + redPileRepr +
+          "\nBlack Pile (" + blackInblackCount + " black cards): " + blackPileRepr;
     }
   }
 
