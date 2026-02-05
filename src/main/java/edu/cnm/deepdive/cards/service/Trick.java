@@ -4,7 +4,9 @@ import edu.cnm.deepdive.cards.model.Card;
 import edu.cnm.deepdive.cards.model.Deck;
 import edu.cnm.deepdive.cards.model.Suit.Color;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.random.RandomGenerator;
 
 public class Trick {
@@ -21,8 +23,7 @@ public class Trick {
     redPile = new ArrayList<>();
   }
 
-  public void perform(boolean swap) {
-
+  public void perform() {
     blackPile.clear();
     redPile.clear();
     deck.shuffle(rng);
@@ -36,36 +37,23 @@ public class Trick {
         redPile.add(nextCard);
       }
     }
-
-    if (swap) {
-      int maxSwap = Math.min(blackPile.size(), redPile.size());
-      int numSwaps = rng.nextInt(1, maxSwap + 1); // Equiv. to 1 + rng.nextInt(maxSwap)
-      for (int i = 0; i < numSwaps; i++) {
-        redPile.add(blackPile.removeFirst());
-        blackPile.add(redPile.removeFirst());
-      }
-    }
-
-    blackPile.sort((card1, card2) -> {
-      int result = card1.getColor().compareTo(card2.getColor());
-      if (result == 0) {
-        result = card1.compareTo(card2);
-      }
-      return result;
-    });
-    redPile.sort((card1, card2) -> {
-      int result = card2.getColor().compareTo(card1.getColor());
-      if (result == 0) {
-        result = card1.compareTo(card2);
-      }
-      return result;
-    });
   }
 
-  public void reveal() {
-    System.out.println(blackPile);
-    System.out.println(redPile);
+  public int swap() {
+    int maxSwap = Math.min(blackPile.size(), redPile.size());
+    int numSwaps = rng.nextInt(1, maxSwap + 1);
+    for (int i = 0; i < numSwaps; i++) {
+      redPile.add(blackPile.removeFirst());
+      blackPile.add(redPile.removeFirst());
+    }
+    return numSwaps;
+  }
+
+  public Map<Color, List<Card>> getResult() {
+    return Map.of(
+        Color.BLACK, Collections.unmodifiableList(blackPile),
+        Color.RED, Collections.unmodifiableList(redPile)
+    );
   }
 
 }
-
